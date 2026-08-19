@@ -1,0 +1,33 @@
+entity,field,type,required,description
+document,document_id,string,yes,论文或专利唯一标识
+document,document_type,enum,yes,paper/patent/dataset
+document,source_url,string,yes,原始来源
+document,publication_date,date,yes,公开日期
+document,patent_family_id,string,no,专利同族标识
+document,legal_status,string,no,注明查询日期与司法辖区
+target,target_id,string,yes,规范化靶标ID
+target,uniprot_id,string,no,UniProt accession
+target,target_construct,string,no,物种突变标签和结构域
+peptide,peptide_id,string,yes,规范化肽ID
+peptide,sequence_helm,string,yes,支持非天然单体与连接的HELM表示
+peptide,canonical_sequence,string,no,天然氨基酸单字母序列
+peptide,cyclization,string,yes,linear/disulfide/thioether/head-tail/other
+peptide,stereochemistry,string,no,D/L与N甲基化信息
+peptide,source_document_id,string,yes,证据溯源
+assay,assay_id,string,yes,测定唯一标识
+assay,target_id,string,yes,关联靶标
+assay,assay_type,string,yes,Kd/Ki/IC50/EC50/enrichment
+assay,value,float,no,原始数值
+assay,unit,string,no,原始单位
+assay,method,string,no,SPR/BLI/ITC/biochemical/cellular
+assay,confidence,enum,yes,high/medium/low
+selection,library_type,string,no,mRNA display/RaPID-like/other
+selection,round_number,integer,no,筛选轮次
+selection,library_size,float,no,报道库容量
+selection,randomized_length,integer,no,随机区长度
+selection,codon_reassignment,string,no,重编程描述
+selection,counter_selection,string,no,反选描述
+ip_claim,claim_id,string,no,权利要求标识
+ip_claim,jurisdiction,string,no,司法辖区
+ip_claim,feature_vector,string,no,linker/reprogramming/cyclization/use
+ip_claim,status_as_of,date,no,法律状态查询日期
