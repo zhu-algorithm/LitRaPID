@@ -1,0 +1,2 @@
+candidate_id,target_id,sequence_helm,cyclization,predicted_affinity_score,selectivity_score,developability_score,novelty_score,evidence_domain_score,ip_similarity_alert,uncertainty,nearest_evidence_ids,design_rationale,status
+CAND-0001,TARGET-001,[example],thioether,,,,,,,high,,示例记录,proposed
