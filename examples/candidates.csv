@@ -1,0 +1,6 @@
+candidate_id,target_id,canonical_sequence,predicted_affinity_score,selectivity_score,developability_score,evidence_domain_score,uncertainty_score,cluster_id,control_type
+CAND-0001,TARGET-001,CPYFWRLC,0.84,0.77,0.69,0.74,0.42,CL-01,candidate
+CAND-0002,TARGET-001,CGTLMQRC,0.79,0.81,0.76,0.68,0.55,CL-02,candidate
+CAND-0003,TARGET-001,NSTWCPKLC,0.75,0.72,0.65,0.71,0.61,CL-03,candidate
+CAND-0004,TARGET-001,RRRRWLLC,0.83,0.60,0.31,0.57,0.70,CL-04,candidate
+CAND-0005,TARGET-001,ACD[BETA_AA]FGC,0.91,0.80,0.72,0.52,0.80,CL-05,candidate

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LitRaPID in silico display</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="hero">
+    <div>
+      <p class="eyebrow">LITERATURE-INFORMED PEPTIDE DISCOVERY</p>
+      <h1>LitRaPID <span>in silico display</span></h1>
+      <p class="lede">Design display-ready sequences, learn from NGS/FACS evidence, and generate a diverse next round.</p>
+    </div>
+    <div class="status"><span></span><strong>Local analysis</strong><small>No sequence data leaves this computer</small></div>
+  </header>
+
+  <main>
+    <section class="workflow" aria-label="workflow">
+      <div class="step active"><b>01</b><span>Screen & export</span></div>
+      <i>→</i><div class="step"><b>02</b><span>NGS/FACS feedback</span></div>
+      <i>→</i><div class="step"><b>03</b><span>Next-round design</span></div>
+    </section>
+
+    <section class="panel controls">
+      <div>
+        <label for="backend">Display backend</label>
+        <select id="backend">
+          <option value="yeast_gpi_macrocycle">GPI yeast macrocycle — literature route</option>
+          <option value="yeast_aga2">Aga2 yeast display</option>
+          <option value="m13_p3">M13 pIII phage display</option>
+        </select>
+      </div>
+      <div><label for="limit">Panel size</label><input id="limit" type="number" value="96" min="1" max="10000"></div>
+      <button id="sample">Load example</button>
+      <button class="primary" id="screen">Screen candidates</button>
+    </section>
+
+    <section class="grid">
+      <article class="panel input-panel">
+        <div class="section-head"><div><p class="kicker">INPUT</p><h2>Candidate CSV</h2></div><label class="file">Upload CSV<input id="candidate-file" type="file" accept=".csv"></label></div>
+        <p class="hint">Required: candidate_id and canonical_sequence. Optional model scores improve ranking.</p>
+        <textarea id="candidates" spellcheck="false" placeholder="candidate_id,canonical_sequence,predicted_affinity_score,..."></textarea>
+      </article>
+
+      <article class="panel evidence-panel">
+        <div class="section-head"><div><p class="kicker">LITERATURE ROUTE</p><h2>GPI macrocycle display</h2></div><span class="tag">Nature 2025</span></div>
+        <div class="route"><div><strong>5</strong><span>macrocycle formats</span></div><div><strong>2+4</strong><span>MB + FACS cycles</span></div><div><strong>NGS</strong><span>population decoding</span></div></div>
+        <ul><li>Cysteine-free GPI anchor</li><li>One- and two-ring topology classification</li><li>Binding/display normalization</li><li>Sanger + NGS-compatible outputs</li></ul>
+      </article>
+    </section>
+
+    <section class="panel results">
+      <div class="section-head"><div><p class="kicker">RESULTS</p><h2 id="result-title">Display-ready candidates</h2></div><div class="actions"><button id="download" disabled>Download CSV</button></div></div>
+      <div id="metrics" class="metrics"></div>
+      <div class="table-wrap"><table><thead id="thead"></thead><tbody id="tbody"><tr><td class="empty">Run screening to populate the candidate table.</td></tr></tbody></table></div>
+    </section>
+
+    <section class="panel simulator">
+      <div class="section-head"><div><p class="kicker">MECHANISTIC POPULATION MODEL</p><h2>RaPID-like mRNA display simulator</h2></div><span class="tag">10¹² virtual molecules</span></div>
+      <p class="hint">Simulates puromycin fusion → translation → thioether cyclization → target binding/wash → RT-PCR bias → NGS sampling across rounds.</p>
+      <div class="sim-controls">
+        <label>Rounds<input id="sim-rounds" type="number" value="6" min="1" max="20"></label>
+        <label>Target (nM)<input id="sim-target" type="number" value="20" min="0.001" step="1"></label>
+        <label>NGS reads/round<input id="sim-reads" type="number" value="20000" min="100"></label>
+        <label>Random seed<input id="sim-seed" type="number" value="2025"></label>
+        <button class="primary" id="simulate">Simulate mRNA display</button>
+      </div>
+      <div id="sim-summary" class="metrics"></div>
+    </section>
+
+    <section class="grid feedback-grid">
+      <article class="panel">
+        <div class="section-head"><div><p class="kicker">ROUND EVIDENCE</p><h2>NGS / FACS feedback CSV</h2></div><label class="file">Upload CSV<input id="feedback-file" type="file" accept=".csv"></label></div>
+        <p class="hint">Use candidate_id, round, NGS counts, target_binding_mfi, display_mfi and optional selectivity/stability fields.</p>
+        <textarea id="feedback" spellcheck="false"></textarea>
+        <button class="primary full" id="learn">Update posterior ranking</button>
+      </article>
+      <article class="panel design-panel">
+        <div><p class="kicker">ACTIVE LEARNING</p><h2>Design the next round</h2></div>
+        <label>Top parents<input id="parents" type="number" value="8" min="1"></label>
+        <label>Variants per parent<input id="variants" type="number" value="12" min="0"></label>
+        <p class="hint">Cysteines are preserved. Acquisition combines posterior evidence, displayability, topology prior and novelty.</p>
+        <button class="primary full" id="design">Generate next-round panel</button>
+      </article>
+    </section>
+  </main>
+  <footer>Computational prioritization only — experimental validation and construct review remain required.</footer>
+  <div id="toast" role="status"></div>
+  <script src="app.js"></script>
+</body>
+</html>

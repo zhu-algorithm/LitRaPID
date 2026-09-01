@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "litrapid"
+version = "0.4.0"
+description = "Literature-driven virtual macrocyclic peptide discovery utilities"
+requires-python = ">=3.10"
+
+[project.scripts]
+litrapid-platform = "litrapid.platform_server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

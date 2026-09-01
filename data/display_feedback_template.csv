@@ -1,0 +1,2 @@
+candidate_id,round,input_count,selected_count,binding_signal,expression_signal,off_target_signal,stability_signal,function_signal
+CAND-0001,1,1000,4200,0.82,0.74,0.12,0.78,0.81

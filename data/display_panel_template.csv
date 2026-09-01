@@ -1,0 +1,2 @@
+candidate_id,target_id,backend,peptide_sequence,display_status,displayability_score,display_flags,prior_model_score,dna_insert,barcode,cluster_id,control_type,round
+CAND-0001,TARGET-001,yeast_aga2,CPYFWRLC,DIRECT_DISPLAY,0.95,,0.82,TGTCCTTATTTTTGGAGATTGTGT,CCTTGACGCTCC,CL-01,candidate,0
