@@ -1,0 +1,9 @@
+{
+  "schema_version": "1.0",
+  "source_repository": "https://github.com/zhu-algorithm/PD-L1-cyclized-peptide",
+  "profiles": [
+    {"id":"pdl1_antibody_pd1_facing_v_domain","target":"PD-L1","references":["PDB:5XXY","PDB:5X8M"],"use":"default PD-L1 design and display validation"},
+    {"id":"pd1_antibody_loop_ensemble","target":"PD-1","references":["PDB:7WSL","PDB:7WVM"],"use":"PD-1-only parallel design; forbidden in PD-L1 ranking"},
+    {"id":"pdl1_patent_mapped_contacts","target":"PD-L1","references":["EP3455257B1","US10544225B2","WO2017055547A1"],"use":"optional evidence overlay requiring claim-by-claim review"}
+  ]
+}

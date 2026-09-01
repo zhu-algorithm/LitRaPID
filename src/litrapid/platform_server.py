@@ -14,6 +14,7 @@ from typing import Any
 from .display_loop import BACKENDS, design_next_round, export_panel, feedback_update
 from .mrna_display import SimulationParameters, simulate_mrna_display
 from .digital_twin import infer_latent_fitness, optimize_protocol
+from .pdl1_bridge import BridgePolicy, validate_pdl1_in_silico_display
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -110,6 +111,13 @@ def api_optimize_protocol(payload: dict[str, Any]) -> dict[str, Any]:
     return {"count": len(rows), "pareto_protocols": rows}
 
 
+def api_pdl1_validation(payload: dict[str, Any]) -> dict[str, Any]:
+    parameters = payload.get("parameters") or {}
+    params = SimulationParameters(**{k: v for k, v in parameters.items() if k in SimulationParameters.__dataclass_fields__})
+    policy = BridgePolicy(**{k: v for k, v in (payload.get("bridge_policy") or {}).items() if k in BridgePolicy.__dataclass_fields__})
+    return validate_pdl1_in_silico_display(payload.get("pdl1_report") or {}, params, policy)
+
+
 def api_meta() -> dict[str, Any]:
     return {
         "name": "LitRaPID in silico display",
@@ -156,7 +164,7 @@ class Handler(SimpleHTTPRequestHandler):
             payload = json.loads(self.rfile.read(length) or b"{}")
             routes = {"/api/export": api_export, "/api/feedback": api_feedback, "/api/design": api_design,
                       "/api/simulate-mrna": api_simulate_mrna, "/api/infer-fitness": api_infer_fitness,
-                      "/api/optimize-protocol": api_optimize_protocol}
+                      "/api/optimize-protocol": api_optimize_protocol, "/api/pdl1-validation": api_pdl1_validation}
             if self.path not in routes:
                 self._json(404, {"error": "unknown endpoint"})
                 return

@@ -8,6 +8,10 @@ This is a literature-informed selection-process simulator, not an atomistic mole
 
 LitRaPID-DT additionally provides bias-aware latent-fitness inference and Pareto protocol optimization through `src/litrapid/digital_twin.py`, with API routes `/api/infer-fitness` and `/api/optimize-protocol`.
 
+## PD-L1 end-to-end validation
+
+`src/litrapid/pdl1_bridge.py` consumes the versioned export from [PD-L1-cyclized-peptide](https://github.com/zhu-algorithm/PD-L1-cyclized-peptide), enforces PD-L1-only epitope profiles, translates conceptual head-to-tail candidates into an explicitly recorded RaPID thioether route, and runs multi-round display plus bias-corrected ranking through `/api/pdl1-validation`. See `docs/pdl1_in_silico_validation.md`.
+
 LitRaPID is a literature- and patent-driven virtual macrocyclic peptide discovery platform. It structures public evidence, represents non-natural macrocycles, builds target evidence packs, generates constrained virtual libraries, and ranks candidates with explicit uncertainty and patent-similarity alerts.
 
 ## Repository contents
