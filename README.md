@@ -6,6 +6,8 @@ The local platform now runs a reproducible, multi-round population simulation of
 
 This is a literature-informed selection-process simulator, not an atomistic molecular-dynamics engine. Supply measured `kd_nm` values when available; predicted affinity scores are treated as recalibratable priors.
 
+LitRaPID-DT additionally provides bias-aware latent-fitness inference and Pareto protocol optimization through `src/litrapid/digital_twin.py`, with API routes `/api/infer-fitness` and `/api/optimize-protocol`.
+
 LitRaPID is a literature- and patent-driven virtual macrocyclic peptide discovery platform. It structures public evidence, represents non-natural macrocycles, builds target evidence packs, generates constrained virtual libraries, and ranks candidates with explicit uncertainty and patent-similarity alerts.
 
 ## Repository contents

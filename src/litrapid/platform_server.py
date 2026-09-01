@@ -13,6 +13,7 @@ from typing import Any
 
 from .display_loop import BACKENDS, design_next_round, export_panel, feedback_update
 from .mrna_display import SimulationParameters, simulate_mrna_display
+from .digital_twin import infer_latent_fitness, optimize_protocol
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -94,6 +95,21 @@ def api_simulate_mrna(payload: dict[str, Any]) -> dict[str, Any]:
     return simulate_mrna_display(candidates, SimulationParameters(**supplied))
 
 
+def api_infer_fitness(payload: dict[str, Any]) -> dict[str, Any]:
+    rows = infer_latent_fitness(payload.get("trajectories") or [], float(payload.get("ridge", 0.25)))
+    return {"count": len(rows), "rows": rows}
+
+
+def api_optimize_protocol(payload: dict[str, Any]) -> dict[str, Any]:
+    candidates = payload.get("candidates") or []
+    base = SimulationParameters(**{k: v for k, v in (payload.get("parameters") or {}).items()
+                                  if k in SimulationParameters.__dataclass_fields__})
+    rows = optimize_protocol(candidates, base, payload.get("target_grid", [5, 20, 100]),
+                             payload.get("wash_grid", [0.35, 0.65, 0.85]),
+                             payload.get("counter_grid", [0.1, 0.35, 0.7]))
+    return {"count": len(rows), "pareto_protocols": rows}
+
+
 def api_meta() -> dict[str, Any]:
     return {
         "name": "LitRaPID in silico display",
@@ -139,7 +155,8 @@ class Handler(SimpleHTTPRequestHandler):
             length = int(self.headers.get("Content-Length", "0"))
             payload = json.loads(self.rfile.read(length) or b"{}")
             routes = {"/api/export": api_export, "/api/feedback": api_feedback, "/api/design": api_design,
-                      "/api/simulate-mrna": api_simulate_mrna}
+                      "/api/simulate-mrna": api_simulate_mrna, "/api/infer-fitness": api_infer_fitness,
+                      "/api/optimize-protocol": api_optimize_protocol}
             if self.path not in routes:
                 self._json(404, {"error": "unknown endpoint"})
                 return
