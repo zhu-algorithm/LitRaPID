@@ -8,6 +8,33 @@ This is a literature-informed selection-process simulator, not an atomistic mole
 
 LitRaPID-DT additionally provides bias-aware latent-fitness inference and Pareto protocol optimization through `src/litrapid/digital_twin.py`, with API routes `/api/infer-fitness` and `/api/optimize-protocol`.
 
+## Mechanistic biosynthesis across display platforms (v0.5)
+
+`src/litrapid/biosynthesis.py` simulates the biosynthetic route itself, step by
+step, for mRNA display (RaPID), phage display (M13 pIII), bacterial SICLOPPS,
+bacterial surface display (eCPX) and yeast display. Where the mechanism says a
+step depends on the sequence, its survival probability is a function of the
+sequence: thioether and disulfide ring-closure kinetics, split-intein splicing,
+Sec export under the positive-inside rule, OmpT dibasic proteolysis, host
+toxicity, and the fate of the amber codon an NNK design inevitably contains.
+
+Bulk losses (yield), ceilings (transformation, sorting) and sequence-dependent
+losses are accounted separately, and diversity is propagated by the Poisson
+survival of each variant's copies, so the simulator distinguishes losing
+material from losing library. Setting `SimulationParameters.biosynthesis_platform`
+makes `simulate_mrna_display` use a per-sequence display probability in place of
+its shared scalar `fusion_probability`; the default is unchanged.
+
+```bash
+PYTHONPATH=src python -m litrapid.biosynthesis compare --length 12
+PYTHONPATH=src python -m litrapid.biosynthesis profile --platform mrna_rapid --sequence YSWDGFTLC
+```
+
+See [the biosynthesis model documentation](docs/biosynthesis_simulation.md).
+This is a mechanistically-motivated parameterisation, not a fitted model: use it
+for cross-platform and cross-sequence comparison, and recalibrate the per-step
+constants on measured data before quoting any of them as a yield.
+
 ## PD-L1 end-to-end validation
 
 `src/litrapid/pdl1_bridge.py` consumes the versioned export from [PD-L1-cyclized-peptide](https://github.com/zhu-algorithm/PD-L1-cyclized-peptide), enforces PD-L1-only epitope profiles, translates conceptual head-to-tail candidates into an explicitly recorded RaPID thioether route, and runs multi-round display plus bias-corrected ranking through `/api/pdl1-validation`. See `docs/pdl1_in_silico_validation.md`.

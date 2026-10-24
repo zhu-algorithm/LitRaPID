@@ -13,6 +13,8 @@ import random
 from dataclasses import asdict, dataclass
 from typing import Any
 
+from .biosynthesis import PLATFORMS, biosynthesis_profile
+
 
 @dataclass(frozen=True)
 class SimulationParameters:
@@ -32,6 +34,13 @@ class SimulationParameters:
     pcr_bias_sigma: float = 0.12
     mutation_rate: float = 0.0
     seed: int = 2025
+    #: When set to a key of `biosynthesis.PLATFORMS`, the four scalar
+    #: efficiencies above are replaced by a sequence-resolved mechanistic
+    #: display probability computed for that platform, so two candidates with
+    #: the same affinity but different manufacturability no longer receive the
+    #: same selection weight. Leave as None for the original population-average
+    #: behaviour.
+    biosynthesis_platform: str | None = None
 
     def validate(self) -> None:
         if not 1 <= self.rounds <= 20:
@@ -46,6 +55,11 @@ class SimulationParameters:
                     raise ValueError(f"{key} must be between 0 and 1")
         if not 0 <= self.nonspecific_retention <= 1 or self.pcr_bias_sigma < 0:
             raise ValueError("invalid retention or PCR-bias parameter")
+        if self.biosynthesis_platform is not None and self.biosynthesis_platform not in PLATFORMS:
+            raise ValueError(
+                f"unknown biosynthesis platform: {self.biosynthesis_platform}; "
+                f"choose one of {sorted(PLATFORMS)}"
+            )
 
 
 def _unit_interval(value: Any, default: float) -> float:
@@ -111,8 +125,19 @@ def simulate_mrna_display(candidates: list[dict[str, Any]], params: SimulationPa
         seen.add(candidate_id)
         kd = _candidate_kd_nm(source)
         occupancy = params.target_concentration_nm / (params.target_concentration_nm + kd)
-        has_cys = "C" in sequence
-        cyclization = params.cyclization_efficiency if has_cys else params.cyclization_efficiency * 0.05
+        if params.biosynthesis_platform:
+            # Mechanistic route: ring closure, export, proteolysis and every
+            # other per-step term are folded into one sequence-resolved
+            # probability, so `cyclization` must not double-count chemistry.
+            profile = biosynthesis_profile(sequence, params.biosynthesis_platform)
+            candidate_fusion = profile["display_probability"]
+            cyclization = 1.0
+            limiting_step = profile["limiting_step"]
+        else:
+            has_cys = "C" in sequence
+            cyclization = params.cyclization_efficiency if has_cys else params.cyclization_efficiency * 0.05
+            candidate_fusion = None
+            limiting_step = None
         pcr_u = max(1e-12, _stable_uniform(candidate_id + sequence, params.seed))
         pcr_bias = math.exp(params.pcr_bias_sigma * rng.normalvariate(0, 1) + 0.02 * math.log(pcr_u))
         nonspecific = _unit_interval(source.get("nonspecific_score"), _stable_uniform(sequence, params.seed + 9) * 0.25)
@@ -122,6 +147,8 @@ def simulate_mrna_display(candidates: list[dict[str, Any]], params: SimulationPa
             "estimated_kd_nm": kd,
             "binding_occupancy": occupancy,
             "cyclization_probability": cyclization,
+            "candidate_fusion_probability": candidate_fusion,
+            "biosynthesis_limiting_step": limiting_step,
             "pcr_bias": pcr_bias,
             "nonspecific_score": nonspecific,
         })
@@ -143,7 +170,12 @@ def simulate_mrna_display(candidates: list[dict[str, Any]], params: SimulationPa
             specific = item["binding_occupancy"] * params.wash_survival
             background = params.nonspecific_retention * (1 + item["nonspecific_score"])
             counter_factor = max(0.0, 1 - params.counterselection_strength * item["nonspecific_score"])
-            selection_probability = fusion_probability * item["cyclization_probability"] * (specific + background) * counter_factor
+            effective_fusion = (
+                item["candidate_fusion_probability"]
+                if item["candidate_fusion_probability"] is not None
+                else fusion_probability
+            )
+            selection_probability = effective_fusion * item["cyclization_probability"] * (specific + background) * counter_factor
             raw_probabilities.append(selection_probability)
             selection_weights.append(freq * selection_probability * params.reverse_transcription_efficiency * item["pcr_bias"])
 
@@ -177,7 +209,10 @@ def simulate_mrna_display(candidates: list[dict[str, Any]], params: SimulationPa
                 "ngs_reads": count,
                 "ngs_frequency": round((count + 0.5) / (params.ngs_reads + 0.5 * len(prepared)), 10),
                 "log2_enrichment": round(enrichment, 6),
-                "fusion_probability": round(fusion_probability, 6),
+                "fusion_probability": round(
+                    item["candidate_fusion_probability"]
+                    if item["candidate_fusion_probability"] is not None
+                    else fusion_probability, 10),
                 "selection_probability": round(sel_prob, 10),
             })
 
@@ -186,7 +221,12 @@ def simulate_mrna_display(candidates: list[dict[str, Any]], params: SimulationPa
         key=lambda row: row["ngs_reads"], reverse=True,
     )
     return {
-        "model": "population-level RaPID-like mRNA display",
+        "model": (
+            f"population-level display selection with mechanistic "
+            f"{params.biosynthesis_platform} biosynthesis"
+            if params.biosynthesis_platform
+            else "population-level RaPID-like mRNA display"
+        ),
         "parameters": asdict(params),
         "round_summaries": summaries,
         "trajectories": trajectories,
